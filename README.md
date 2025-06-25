@@ -1,7 +1,7 @@
 # MemeHub
 
 <p align="center">
-  <img src="https://i.imgur.com/pQXoUSK.png" alt="Logo MemeHub" width="200" height="auto"/>
+  <img src="https://i.pinimg.com/736x/75/3e/31/753e3132cb52e77ee9fa984d63736a74.jpg" alt="Logo MemeHub" width="200" height="auto"/>
 </p>
 
 <p align="center">
