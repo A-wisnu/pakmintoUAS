@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'MemeHub') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    @viteReactRefresh
+    @vite(['resources/sass/app.scss', 'resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Fallback for CSS in case Vite is not working -->
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    
+    <style>
+        /* Custom styles */
+        :root {
+            --primary-color: #0080ff;
+            --secondary-color: #ff5500;
+            --dark-color: #333333;
+            --light-color: #f8f9fa;
+            --gradient-start: #0080ff;
+            --gradient-end: #00c3ff;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navbar {
+            padding: 1rem 0;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar.scrolled {
+            padding: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: transparent !important;
+            position: relative;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, var(--primary-color), var(--gradient-end), var(--primary-color));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 5s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            letter-spacing: 0.5px;
+        }
+        
+        .navbar-brand::before {
+            content: "🚀";
+            margin-right: 10px;
+            font-size: 1.3rem;
+            animation: rocket-float 3s ease-in-out infinite;
+            -webkit-text-fill-color: initial;
+        }
+        
+        @keyframes rocket-float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark-color) !important;
+            margin: 0 0.7rem;
+            padding: 0.5rem 0.3rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .nav-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-text {
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-item::before {
+            content: attr(data-category);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            z-index: 1001;
+        }
+        
+        .nav-item:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link:hover .nav-icon {
+            transform: translateY(-3px) scale(1.1);
+            color: var(--primary-color);
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .nav-link.active .nav-icon {
+            color: var(--primary-color);
+        }
+        
+        .nav-login {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-login:hover {
+            text-shadow: 0 0 8px rgba(0, 128, 255, 0.5);
+        }
+        
+        .nav-register {
+            background: transparent;
+            color: var(--primary-color) !important;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .nav-register:hover {
+            transform: translateY(-3px);
+            color: var(--primary-color) !important;
+        }
+        
+        .nav-register:hover .nav-text {
+            color: var(--primary-color) !important;
+        }
+        
+        .nav-register .nav-icon {
+            color: var(--primary-color);
+        }
+        
+        .hero-section {
+            padding: 6rem 0 10rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 30px 0 0 30px;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .search-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 30px 30px 0;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .search-button:hover {
+            background-color: #0070e0;
+        }
+        
+        .browse-btn {
+            display: inline-block;
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 30px;
+            padding: 0.75rem 2.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+        
+        .browse-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Decorative elements */
+        .colored-dot {
+            position: absolute;
+            border-radius: 50%;
+        }
+        
+        .dot-yellow {
+            width: 20px;
+            height: 20px;
+            background-color: #FFDD00;
+            left: 15%;
+            top: 15%;
+        }
+        
+        .dot-blue {
+            width: 15px;
+            height: 15px;
+            background-color: var(--primary-color);
+            right: 25%;
+            top: 30%;
+        }
+        
+        .dot-blue-small {
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary-color);
+            right: 20%;
+            top: 60%;
+        }
+        
+        .plus-shape {
+            position: absolute;
+            left: 10%;
+            top: 60%;
+            font-size: 2rem;
+            color: #0080ff;
+            font-weight: 300;
+        }
+        
+        .triangle-shape {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid #FFDD00;
+            right: 30%;
+            bottom: 20%;
+            transform: rotate(15deg);
+        }
+        
+        /* Floating emoji styles */
+        .floating-emoji {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            z-index: 1;
+        }
+        
+        .floating-emoji:hover {
+            transform: scale(1.1);
+        }
+        
+        .floating-emoji span {
+            display: inline-block;
+        }
+        
+        footer {
+            background-color: var(--light-color);
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        .footer-links a {
+            color: var(--dark-color);
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: 500;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Dropdown menu styling */
+        .dropdown-menu {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: dropdown-fade 0.3s ease-out;
+        }
+        
+        @keyframes dropdown-fade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(45deg, rgba(0,128,255,0.1), rgba(0,195,255,0.1));
+            color: var(--primary-color);
+            padding-left: 1.8rem;
+        }
+        
+        .dropdown-item:active {
+            background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+        }
+        
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-section {
+                padding: 4rem 0 6rem;
+            }
+            
+            .floating-emoji {
+                transform: scale(0.7);
+            }
+            
+            .emoji-yellow {
+                left: 5%;
+                top: 20%;
+            }
+            
+            .emoji-lol {
+                right: 5%;
+                font-size: 3.5rem;
+            }
+            
+            .emoji-red, .emoji-green, .emoji-black1, .emoji-black2 {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    {{ config('app.name', 'MemeHub') }}
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav align-items-center">
+                        @guest
+                        <li class="nav-item" data-category="Main Page">
+                            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                                <span class="nav-icon"><i class="fas fa-home"></i></span>
+                                <span class="nav-text">Home</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-category="Popular Memes">
+                            <a class="nav-link {{ request()->routeIs('memes.feed') ? 'active' : '' }}" href="{{ route('memes.feed') }}">
+                                <span class="nav-icon"><i class="fas fa-fire-alt"></i></span>
+                                <span class="nav-text">Browse</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-category="Member Access">
+                            <a class="nav-link nav-login" href="{{ route('login') }}">
+                                <span class="nav-icon"><i class="fas fa-sign-in-alt"></i></span>
+                                <span class="nav-text">Login</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-category="Join Community">
+                            <a class="nav-link nav-register" href="{{ route('register') }}">
+                                <span class="nav-icon"><i class="fas fa-user-plus"></i></span>
+                                <span class="nav-text">Register</span>
+                            </a>
+                        </li>
+                        @else
+                        <li class="nav-item" data-category="Share Your Meme">
+                            <a class="nav-link {{ request()->routeIs('memes.create') ? 'active' : '' }}" href="{{ route('memes.create') }}">
+                                <span class="nav-icon"><i class="fas fa-upload"></i></span>
+                                <span class="nav-text">Upload</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown" data-category="Account Options">
+                            <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
+                                <span class="nav-text">{{ Auth::user()->name }}</span>
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{{ route('profile.show', Auth::user()->id) }}">
+                                    <i class="fas fa-id-card me-2"></i> Profile
+                                </a>
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault();
+                                                 document.getElementById('logout-form').submit();">
+                                    <i class="fas fa-sign-out-alt me-2"></i> {{ __('Logout') }}
+                                </a>
+
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
+                            </div>
+                        </li>
+                        @endguest
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            @yield('content')
+        </main>
+        
+        <footer class="footer">
+            <div class="container">
+                <div class="text-center">
+                    <div class="mb-3">
+                        dibuat oleh wisnu hidayat mahasiswa teknik informatika universitas nahdlatul ulama jepara, nim 231240001422
+                    </div>
+                    <div class="copyright">
+                        &copy; {{ date('Y') }} MemeHub. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Navbar Animation Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+            
+            // Add scrolled class on scroll with smooth transition
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+            
+            // Navbar item hover animation
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    const icon = this.querySelector('.nav-icon i');
+                    if (icon) {
+                        // Add subtle rotation to icon on hover
+                        icon.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        icon.style.transform = 'translateY(-3px) scale(1.2) rotate(5deg)';
+                    }
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    const icon = this.querySelector('.nav-icon i');
+                    if (icon) {
+                        icon.style.transition = 'all 0.3s ease';
+                        icon.style.transform = '';
+                    }
+                });
+            });
+            
+            // Set active state for current page with animation
+            const currentLocation = location.pathname;
+            
+            navLinks.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href && (href === currentLocation || currentLocation.startsWith(href))) {
+                    item.classList.add('active');
+                    
+                    // Add subtle animation to active menu item
+                    const icon = item.querySelector('.nav-icon');
+                    if (icon) {
+                        icon.style.color = 'var(--primary-color)';
+                        setTimeout(() => {
+                            icon.style.transform = 'scale(1.1)';
+                            setTimeout(() => {
+                                icon.style.transform = '';
+                            }, 500);
+                        }, 300);
+                    }
+                }
+            });
+            
+            // Add subtle entrance animation for navbar
+            navbar.style.opacity = '0';
+            navbar.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                navbar.style.transition = 'all 0.5s ease';
+                navbar.style.opacity = '1';
+                navbar.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
